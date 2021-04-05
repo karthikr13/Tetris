@@ -35,13 +35,44 @@ module VGAController(
 		VIDEO_WIDTH = 640,  // Standard VGA Width
 		VIDEO_HEIGHT = 480; // Standard VGA 
 
-	reg[9:0] originx = 9'd50;
-	reg[8:0] originy = 8'd50;
+	reg signed[10:0] originx[9:0];
+	reg signed[10:0] originy[9:0];
+	reg[9:0] active_block = 0;
+	integer i;
+	initial begin
+		originx[0] <= 10'd50;
+		originy[0] <= 10'd50;
+		for(i = 1; i < 10; i = i + 1) begin
+			originx[i] <= 10'd0;
+			originy[i] <= -10'd60;
+		end
+	end
+	reg[9:0] xend_1, yend_1, xend_2, yend_2;
+	reg active_reached = 0;
 	always @(posedge slowerClock) begin
-		originx <= originx - 25*ctrl1 + 25*ctrl2;
+		originx[active_block] <= originx[active_block] - 25*ctrl1 + 25*ctrl2;
         // originx <= originx - ctrl2;
-	    originy <= originy == VIDEO_HEIGHT - 50 ? originy : originy + 1;
-		
+	    originy[active_block] <= originy[active_block] == VIDEO_HEIGHT - 50 ? originy[active_block] : originy[active_block] + 1;
+		active_reached <= originy[active_block] == VIDEO_HEIGHT - 50;
+		if(active_reached == 1) begin
+			if(xend_1 > originx[active_block] || xend_1 == 0) begin
+				xend_1 = originx[active_block];
+			end
+			if(xend_2 < originx[active_block] + 50 || xend_2 == 0) begin
+				xend_2 = originx[active_block] + 50;
+			end
+			if(yend_1 > originy[active_block] || yend_1 == 0) begin
+				yend_1 = originy[active_block];
+			end
+			if(yend_2 < originy[active_block] + 50 || yend_2 == 0) begin
+				yend_2 = originy[active_block] + 50;
+			end
+			
+			active_block <= active_block + 1;
+			
+			originy[active_block] <= 10'd50;
+			active_reached <= 0;
+		end
 		// originy <= originy - ctrl4;
 	end
 	
@@ -51,21 +82,22 @@ module VGAController(
 
 	wire [9:0] xend;
 	wire [8:0] yend;
-	assign xend = originx + 9'd50;
-	assign yend = originy + 8'd50;
+	assign xend = originx[active_block] + 9'd50;
+	assign yend = originy[active_block] + 8'd50;
 	wire xgreater;
 	wire xless;
-	assign xgreater = x > originx;
+	assign xgreater = x > originx[active_block];
 	assign xless = x < xend;
 
 	wire ygreater;
 	wire yless;
-	assign ygreater = y > originy;
+	assign ygreater = y > originy[active_block];
 	assign yless = y < yend;
 
 	wire inside;
-	and insideand(inside, xgreater, xless, ygreater, yless);
-
+	//and insideand(inside, xgreater, xless, ygreater, yless);
+	assign inside = ((x >= xend_1) & (x <= xend_2) & (y >= yend_1) & (y <= yend_2)) | (xless & yless & xgreater & ygreater);
+	//assign inside = (xless & yless & xgreater & ygreater);
 	wire active, screenEnd;
 
 	
