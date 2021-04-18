@@ -1,5 +1,5 @@
 `timescale 1 ns/ 100 ps
-module VGAController(     
+module grid_test(     
 	input clk, 			// 100 MHz System Clock
 	input reset, 		// Reset Signal
 	input ctrl1, 
@@ -160,14 +160,14 @@ module VGAController(
   
     integer j, k;
   
-    integer n;
-    always @(posedge slowerClock) begin
-        $display("active x: %d active y: %d, floor_reached: %b, right: %b", active_cell[1][0][1], active_cell[1][0][0], floor_reached, ctrl2);
-        /*for(n = 0; n < 16; n = n + 1) begin
-            $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid[n][0], grid[n][1], grid[n][2], grid[n][3], grid[n][4], grid[n][5], grid[n][6], grid[n][7], grid[n][8], grid[n][9], grid[n][10], grid[n][11], grid[n][12], grid[n][13], grid[n][14], grid[n][15]);
-        end*/
-        for(n = 0; n < 16; n = n + 1) begin
-            $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);
-        end
-    end
+    // integer n;
+    // always @(posedge slowerClock) begin
+    //     $display("active x: %d active y: %d, floor_reached: %b, right: %b", active_cell[1][0][1], active_cell[1][0][0], floor_reached, ctrl2);
+    //     /*for(n = 0; n < 16; n = n + 1) begin
+    //         $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid[n][0], grid[n][1], grid[n][2], grid[n][3], grid[n][4], grid[n][5], grid[n][6], grid[n][7], grid[n][8], grid[n][9], grid[n][10], grid[n][11], grid[n][12], grid[n][13], grid[n][14], grid[n][15]);
+    //     end*/
+    //     for(n = 0; n < 16; n = n + 1) begin
+    //         $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);
+    //     end
+    // end
 endmodule

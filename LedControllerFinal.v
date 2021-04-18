@@ -30,6 +30,7 @@ module LedControllerFinal(
     reg readyReg = 0;
 
     always @(posedge arduinoClock) begin
+        readyReg <= 0;
         if(dataCounter < dataCounterMax) begin
             dataCounter <= dataCounter + 1;
             color <= dataReg[dataCounter] ? 8'b0 : 8'b11111111;

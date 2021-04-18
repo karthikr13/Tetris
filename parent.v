@@ -1,22 +1,25 @@
 module parent(
     input arduinoClock,
     input clock,
-    output[7:0] ledOut
-);
+    input start,
+    output[7:0] ledOut,
+    output arduinoStart);
+
     wire[255:0] values;
-    reg[7:0] counter = 0;
+    reg[8:0] counter = 0;
+    reg ledstart = 0;
+    reg clk = 0;
 
+    LedControllerFinal controller(clk, arduinoClock, ledstart, values, ledOut, arduinoStart);
 
-    LedController controller(clock, ledOut, arduinoClock, /*ready*/, finished);
+    single_block_grid gridtest(.clk(clk), .reset(1'b0), .ctrl1(1'b0), .ctrl2(1'b0), .grid_out(values));
 
-    karthikthing(values);
-
-    always @(posedge arduinoClock) begin
-        if(counter < 255) begin
-            dataCounter <= dataCounter + 1;
-        end else begin
-            dataCounter <= 0;
-        end
+    always @(start) begin
+        clk = ~clk;
+        #20
+        clk = ~clk;
+        #20
+        ledstart <= 1;
     end
 
 endmodule

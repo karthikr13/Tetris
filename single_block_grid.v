@@ -5,6 +5,8 @@ module single_block_grid(
 	input ctrl1, 
 	input ctrl2, 
     output[255:0] grid_out);
+
+    );
 	
 	// Lab Memory Files Location
 	//localparam FILES_PATH = "C:/Users/kr211/Downloads/final2/";
