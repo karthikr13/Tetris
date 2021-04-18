@@ -1,18 +1,10 @@
 `timescale 1 ns/ 100 ps
-module VGAController(     
+module single_block_grid(     
 	input clk, 			// 100 MHz System Clock
 	input reset, 		// Reset Signal
-	output hSync, 		// H Sync Signal
-	output vSync, 		// Veritcal Sync Signal
 	input ctrl1, 
 	input ctrl2, 
-	input ctrl3, 
-	input ctrl4,
-	output[3:0] VGA_R,  // Red Signal Bits
-	output[3:0] VGA_G,  // Green Signal Bits
-	output[3:0] VGA_B,  // Blue Signal Bits
-	inout ps2_clk,
-	inout ps2_data);
+    output[255:0] grid_out);
 	
 	// Lab Memory Files Location
 	//localparam FILES_PATH = "C:/Users/kr211/Downloads/final2/";
@@ -20,7 +12,7 @@ module VGAController(
 
 	// Clock divider 100 MHz -> 25 MHz
 	wire clk25; // 25MHz clock
-	
+    reg[255:0] grid_out_reg;
     wire slowerClock;
     
 	reg[31:0] pixCounter = 0;      // Pixel counter to divide the clock
@@ -52,6 +44,9 @@ module VGAController(
         active_cell_x <= 0;
         active_cell_y <= 0;
         grid[0][0] <= 1;
+        for(i = 0; i < 256; i = i + 1) begin
+            grid_out_reg[i] <= 0;
+        end
 	end
     reg blocked = 0;
     //reg[6:0] active_cell[3][4]; //2x4, active_cell[0] contains metadata ([0][0] is left most, [0][1] is right most)
@@ -107,38 +102,22 @@ module VGAController(
     end
 	
 
-    //VGA stuff
-    wire[9:0] x;
-	wire[8:0] y;
-
-	wire inside;
-    reg xyinside = 0;
-    reg[8:0] x2 = 25;
-    reg[8:0] y2 = 25;
+  
     integer j, k;
+    assign grid_out = grid_out_reg;
     always @(posedge slowerClock) begin
-        for(j = 0; j < 16; j = j + 1) begin
-            for(k = 0; k < 16; k = k + 1) begin
-                if(grid[j][k] == 1) begin
-                    if(inside == 0) begin
-                        xyinside <= (y2 > j*50) & (y2 < (j+1)*50) & (x2 > k*50) & (x2 < (k+1) * 50);
-                    end
-                end
-            end
+        for(i = 0; i < 256; i = i + 1) begin
+            grid_out_reg[i] <= grid[i % 16][i / 16];
         end
     end
-	/*//and insideand(inside, xgreater, xless, ygreater, yless);
-	assign inside = ((x >= xend_1) & (x <= xend_2) & (y >= yend_1) & (y <= yend_2)) | (xless & yless & xgreater & ygreater);
-	//assign inside = (xless & yless & xgreater & ygreater);*/
-	wire active, screenEnd;
-
-
     integer n;
-    always @(posedge slowerClock) begin
-        $display("active x: %d active y: %d, floor_reached: %b, right: %b", active_cell_x, active_cell_y, floor_reached, ctrl2);
-        $display("inside: %d", inside);
+    
+    /*always @(posedge slowerClock) begin
         for(n = 0; n < 16; n = n + 1) begin
             $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid[n][0], grid[n][1], grid[n][2], grid[n][3], grid[n][4], grid[n][5], grid[n][6], grid[n][7], grid[n][8], grid[n][9], grid[n][10], grid[n][11], grid[n][12], grid[n][13], grid[n][14], grid[n][15]);
         end
-    end
+        for(n = 0; n < 16; n = n + 1) begin
+            $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);
+        end
+    end*/
 endmodule
