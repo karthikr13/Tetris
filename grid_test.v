@@ -15,8 +15,8 @@ module VGAController(
 	inout ps2_data);
 	
 	// Lab Memory Files Location
-	localparam FILES_PATH = "C:/Users/kr211/Downloads/final2/";
-    //localparam FILES_PATH = "";
+	//localparam FILES_PATH = "C:/Users/kr211/Downloads/final2/";
+    localparam FILES_PATH = "";
 
 	// Clock divider 100 MHz -> 25 MHz
 	wire clk25; // 25MHz clock
@@ -51,14 +51,68 @@ module VGAController(
 		end
         active_cell_x <= 0;
         active_cell_y <= 0;
-        grid[0][0] <= 1;
+        for(i = 0; i < 2; i = i + 1) begin
+            for(m = 0; m < 4; m = m + 1) begin
+                active_cell[i][m][0] <= i;
+                active_cell[i][m][1] <= m;
+            end
+        end
+        //grid[0][0] <= 1;
+
 	end
     reg blocked = 0;
-    //reg[6:0] active_cell[3][4]; //2x4, active_cell[0] contains metadata ([0][0] is left most, [0][1] is right most)
-
+    reg signed[6:0] active_cell[2][4][2]; //2x4x2; [0][0] is top left, [1][3] is bottom right. if cell should be empty, it'll be set to -1
+    integer yint, r;
     always @(posedge slowerClock) begin
         blocked <= 0;
-        floor_reached <= (active_cell_y >= 15) || (active_cell_y < 15 && grid[active_cell_y + 1][active_cell_x] == 1);
+        floor_reached <= 0;
+        for(r=0; r <4; r = r + 1) begin
+            if(!floor_reached)
+                floor_reached <= (active_cell[1][r][0] >= 15) || grid[active_cell[1][r][0] + 1][active_cell[1][r][1]] == 1;
+        end
+        for(yint = 0; yint < 2; yint = yint + 1) begin
+            if((active_cell[yint][3][1]==15  | (grid[active_cell[yint][3][0]+1][active_cell[yint][3][1] + 1] == 1)) & ctrl2 & !blocked) begin
+                //active_cell_x <= (active_cell_x - ctrl1)< 0 ? 0 : active_cell_x - ctrl1;
+                blocked <= 1;
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        active_cell[k][i][1] <= active_cell[k][i][1] - ctrl1;
+                    end
+                end   
+            end
+            else if(grid[active_cell[yint][0][0]+1][active_cell[yint][0][1] - 1] == 1 & ctrl1) begin
+                //active_cell_x <= (active_cell_x - ctrl1)< 0 ? 0 : active_cell_x +ctrl2; 
+                blocked <= 1;
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        active_cell[k][i][1] <= active_cell[k][i][1] + ctrl2;
+                    end
+                end   
+            end
+        else
+            //active_cell_x <= (active_cell_x - ctrl1 + ctrl2)< 0 ? 0 : active_cell_x - ctrl1 + ctrl2;
+            for(k = 0; k < 2; k = k+1) begin
+                for(i = 0; i < 4; i = i + 1) begin
+                    active_cell[k][i][1] <= active_cell[k][3][1]==15 ? active_cell[k][i][1] - ctrl1 : active_cell[k][i][1] - ctrl1 + ctrl2;
+                end
+            end   
+        end
+
+        for(k = 0; k < 2; k = k+1) begin
+            for(i = 0; i < 4; i = i + 1) begin
+                active_cell[k][i][0] <= floor_reached ? active_cell[k][i][0] : active_cell[k][i][0] + 1;
+            end
+        end   
+
+        if(floor_reached) begin
+            for(i = 0; i < 2; i = i + 1) begin
+                for(m = 0; m < 4; m = m + 1) begin
+                    active_cell[i][m][0] <= i;
+                    active_cell[i][m][1] <= m;
+                end
+            end
+        end
+        /*floor_reached <= (active_cell_y >= 15) || (active_cell_y < 15 && grid[active_cell_y + 1][active_cell_x] == 1);
         
         if(grid[active_cell_y+1][active_cell_x + 1] == 1 & ctrl2) begin
             active_cell_x <= (active_cell_x - ctrl1 + ctrl2)< 0 ? 0 : active_cell_x - ctrl1;
@@ -75,23 +129,55 @@ module VGAController(
         if(floor_reached) begin
             active_cell_y <= 0;
             active_cell_x <= 0;
-        end
+        end*/
     end
     integer a, b, c;
     always @(negedge slowerClock) begin
         if(floor_reached) begin
             //$display("NEGEDGE");
-            grid[active_cell_y][active_cell_x] <= 1;
+            /*for(k = 0; k < 2; k = k+1) begin
+                for(i = 0; i < 4; i = i + 1) begin
+                    grid[active_cell[k][i][0]][active_cell[k][i][1]] <= 1;
+                end
+            end*/
+            //grid[active_cell_y][active_cell_x] <= 1;
         end
         else begin
-            if((ctrl1 == 0 && ctrl2 == 0) | blocked)
-                grid[active_cell_y-1][active_cell_x] <= 0;
-            if(ctrl1 == 1 && ctrl2 == 0 && !blocked)
-                grid[active_cell_y-1][active_cell_x+1] <= 0;
-            if(ctrl1 == 0 && ctrl2 == 1 && !blocked)
-                grid[active_cell_y-1][active_cell_x-1] <= 0;
+            if((ctrl1 == 0 && ctrl2 == 0) | blocked) begin
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        grid[active_cell[k][i][0]-1][active_cell[k][i][1]] <= 0;
+                    end
+                end
+            end
+                //grid[active_cell_y-1][active_cell_x] <= 0;
+            if(ctrl1 == 1 && ctrl2 == 0 && !blocked) begin
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        grid[active_cell[k][i][0]-1][active_cell[k][i][1]+1] <= 0;
+                    end
+                end
+            end
+                //grid[active_cell_y-1][active_cell_x+1] <= 0;
+            if(ctrl1 == 0 && ctrl2 == 1 && !blocked) begin
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        grid[active_cell[k][i][0]-1][active_cell[k][i][1]-1] <= 0;
+                    end
+                end
+            end
+                //grid[active_cell_y-1][active_cell_x-1] <= 0;
         end
-        grid[active_cell_y][active_cell_x] <= 1;
+        
+        if(!floor_reached) begin
+            for(k = 0; k < 2; k = k+1) begin
+            for(i = 0; i < 4; i = i + 1) begin
+                grid[active_cell[k][i][0]][active_cell[k][i][1]] <= 1;
+            end
+        end
+        end
+        
+        //grid[active_cell_y][active_cell_x] <= 1;
 
         for(a = 0; a < 16; a = a+1) begin
             if(grid[a][0] & grid[a][1] & grid[a][2] & grid[a][3] & grid[a][4] & grid[a][5] & grid[a][6] & grid[a][7] & grid[a][8] & grid[a][9] & grid[a][10] & grid[a][11] & grid[a][12] & grid[a][13] & grid[a][14] & grid[a][15]) begin
@@ -191,11 +277,10 @@ module VGAController(
 	// Quickly assign the output colors to their channels using concatenation
 	assign {VGA_R, VGA_G, VGA_B} = colorOut;
     integer n;
-    /*always @(posedge slowerClock) begin
-        $display("active x: %d active y: %d, floor_reached: %b, right: %b", active_cell_x, active_cell_y, floor_reached, ctrl2);
-        $display("inside: %d", inside);
+    always @(posedge slowerClock) begin
+        $display("active x: %d active y: %d, floor_reached: %b, right: %b", active_cell[1][0][1], active_cell[1][0][0], floor_reached, ctrl2);
         for(n = 0; n < 16; n = n + 1) begin
             $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid[n][0], grid[n][1], grid[n][2], grid[n][3], grid[n][4], grid[n][5], grid[n][6], grid[n][7], grid[n][8], grid[n][9], grid[n][10], grid[n][11], grid[n][12], grid[n][13], grid[n][14], grid[n][15]);
         end
-    end*/
+    end
 endmodule
