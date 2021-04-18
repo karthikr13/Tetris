@@ -7,18 +7,13 @@ module test();
     end
     reg clock = 1;
 
+
     always @* begin
         #10
         clock <= ~clock;
     end
 
 
-
-    // LedController LedController(.clk(clock));
-
-    // initial begin
-    //     $dumpfile("test.vcd");
-    //     $dumpvars(0, test);
     LedController LedController(.clk(clock));*/
     wire[3:0] w;
     assign w = 4'b0000;
