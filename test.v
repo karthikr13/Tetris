@@ -22,12 +22,12 @@ module test();
     end
 
     always @* begin
-        if(boolean == 0) begin
+        if(boolean < 3) begin
             #100
             start <= 1;
             #100
             start <= 0;
-            boolean <= 1;
+            boolean <= boolean + 1;
         end
     end
 
