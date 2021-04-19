@@ -2,10 +2,13 @@
 module test();
 
     initial begin
-        #10000000
+        #1000000
         $finish;
     end
     reg clock = 1;
+    reg arduinoClock = 0;
+    reg start = 0;
+    reg boolean = 0;
 
 
     always @* begin
@@ -13,13 +16,20 @@ module test();
         clock <= ~clock;
     end
 
-
-    LedController LedController(.clk(clock));*/
-    wire[3:0] w;
-    assign w = 4'b0000;
-
-    initial begin
-        #20
-        $display(&w);
+    always @* begin
+        #100
+        arduinoClock <= ~arduinoClock;
     end
+
+    always @* begin
+        if(boolean == 0) begin
+            #100
+            start <= 1;
+            #100
+            start <= 0;
+            boolean <= 1;
+        end
+    end
+
+    parent parent(.arduinoClock(arduinoClock), .clock(clock), .start(start));
 endmodule
