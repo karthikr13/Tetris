@@ -20,6 +20,7 @@ module grid_test_tb;
             end
             #20
             clk = ~clk;
+            //$display("%d", grid_out);
             //$display("%b", grid_out);
             /*for(n = 0; n < 16; n = n + 1) begin
                 $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);

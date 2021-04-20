@@ -50,8 +50,8 @@ module grid_test(
 	end
     reg blocked = 0;
     //reg signed[6:0] active_cell[2][4][2]; //2x4x2; [0][0] is top left, [1][3] is bottom right. if cell should be empty, it'll be set to -1
-    reg signed[6:0] active_cell_y[1:0][3:0];
-    reg signed[6:0] active_cell_x[1:0][3:0];
+    reg signed[6:0] active_cell_y[2][4];
+    reg signed[6:0] active_cell_x[2][4];
     integer yint, r;
     always @(posedge slowerClock) begin
         blocked <= 0;
@@ -105,7 +105,7 @@ module grid_test(
     end
 
     integer a, b, c;
-    always @(negedge slowerClock) begin
+    always @(posedge slowerClock) begin
         if(floor_reached) begin
         end
         else begin
@@ -154,6 +154,51 @@ module grid_test(
     end
 	
     always @(posedge slowerClock) begin
+        if(floor_reached) begin
+        end
+        else begin
+            if((ctrl1 == 0 && ctrl2 == 0) | blocked) begin
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        grid[active_cell_y[k][i]-1][active_cell_x[k][i]] <= 0;
+                    end
+                end
+            end
+            if(ctrl1 == 1 && ctrl2 == 0 && !blocked) begin
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        grid[active_cell_y[k][i]-1][active_cell_x[k][i]+1] <= 0;
+                    end
+                end
+            end
+            if(ctrl1 == 0 && ctrl2 == 1 && !blocked) begin
+                for(k = 0; k < 2; k = k+1) begin
+                    for(i = 0; i < 4; i = i + 1) begin
+                        grid[active_cell_y[k][i]-1][active_cell_x[k][i]-1] <= 0;
+                    end
+                end
+            end
+        end
+        
+        if(!floor_reached) begin
+            for(k = 0; k < 2; k = k+1) begin
+                for(i = 0; i < 4; i = i + 1) begin
+                    grid[active_cell_y[k][i]][active_cell_x[k][i]] <= 1;
+                end
+            end
+        end
+        
+
+        for(a = 0; a < 16; a = a+1) begin
+            if(grid[a][0] & grid[a][1] & grid[a][2] & grid[a][3] & grid[a][4] & grid[a][5] & grid[a][6] & grid[a][7] & grid[a][8] & grid[a][9] & grid[a][10] & grid[a][11] & grid[a][12] & grid[a][13] & grid[a][14] & grid[a][15]) begin
+                for(b = 0; b < 16; b = b+1) begin
+                    for(c = a; c > 0; c = c - 1) begin
+                        grid[c][b] <= grid[c-1][b];
+                    end
+                    
+                end
+            end
+        end
         for(i = 0; i < 256; i = i + 1) begin
             grid_out_reg[i] <= grid[i % 16][i / 16];
         end
@@ -161,7 +206,13 @@ module grid_test(
     assign grid_out = grid_out_reg;
   
     integer j, k;
-
+  
     integer n;
-
+    always @(posedge slowerClock) begin
+        
+        for(n = 0; n < 16; n = n + 1) begin
+            $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);
+        end
+    end
+    
 endmodule
