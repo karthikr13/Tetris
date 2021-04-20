@@ -16,8 +16,7 @@ module test();
         clock <= ~clock;
     end
 
-    always @* begin
-        #100
+    always @(posedge clock) begin
         arduinoClock <= ~arduinoClock;
     end
 
@@ -26,7 +25,7 @@ module test();
             start <= 1;
         end else begin
             start <= 0;
-        end 
+        end
     end
 
     // always @* begin

@@ -93,7 +93,6 @@ module LedControllerFinal(
         end
     end
 
-    integer n;
 
     always @(posedge clk) begin
         if (CTRL_BEGIN == 1 && latched == 0) begin
@@ -119,9 +118,7 @@ module LedControllerFinal(
             // end
             dataReg <= data;
 
-            for(n = 0; n < 16; n = n + 1) begin
-                $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", dataReg[n+0], dataReg[n+16], dataReg[n+32], dataReg[n+48], dataReg[n+64], dataReg[n+80], dataReg[n+96], dataReg[n+112], dataReg[n+128], dataReg[n+144], dataReg[n+160], dataReg[n+176], dataReg[n+192], dataReg[n+208], dataReg[n+224], dataReg[n+240]);
-            end
+            
         end
         if(latched2 == 1 && latched3 == 1) begin
             latched <= 0;
