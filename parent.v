@@ -19,7 +19,7 @@ module parent(
 
     LedControllerFinal controller(clock, arduinoClock, arduinoClock2, ledstart, values, ledOut, ledOut2, arduinoStart, arduinoStart2, finished);
 
-    single_block_grid gridtest(.clk(clock), .enable(enable), .reset(1'b0), .ctrl1(1'b0), .ctrl2(1'b0), .grid_out(values));
+    grid_test gridtest(.clk(clock), .enable(enable), .reset(1'b0), .ctrl1(1'b0), .ctrl2(1'b0), .grid_out(values));
 
     always @(posedge clock) begin
         if(start == 1 && enable == 0 && ledstart == 0) begin
@@ -29,8 +29,8 @@ module parent(
             // $display("%b", values);
         end else if(enable == 1)begin
             enable <= 0;
-            ledstart <= 1;
-        end else if(ledstart == 1) begin
+            ledstart <= ledstart + 1;
+        end else if(ledstart >= 4) begin
             ledstart <= 0;
         end
         
