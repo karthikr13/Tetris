@@ -40,9 +40,6 @@ set_property IOSTANDARD LVCMOS33 [get_ports start]
 set_property PACKAGE_PIN G14 [get_ports startest]
 set_property IOSTANDARD LVCMOS33 [get_ports startest]
 
-set_property PACKAGE_PIN R12 [get_ports temp]
-set_property IOSTANDARD LVCMOS33 [get_ports temp]
-
 set_property PACKAGE_PIN C17 [get_ports {ledOut[0]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {ledOut[0]}]
 set_property PACKAGE_PIN D18 [get_ports {ledOut[1]}]

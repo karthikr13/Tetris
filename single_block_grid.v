@@ -2,6 +2,7 @@
 module single_block_grid(     
 	input clk, 			// 100 MHz System Clock
 	input reset, 		// Reset Signal
+    input enable,
 	input ctrl1, 
 	input ctrl2, 
     output[255:0] grid_out);
@@ -17,9 +18,11 @@ module single_block_grid(
     
 	reg[31:0] pixCounter = 0;      // Pixel counter to divide the clock
     assign clk25 = pixCounter[1]; // Set the clock high whenever the second bit (2) is high
-	assign slowerClock = pixCounter[15];
+	assign slowerClock = pixCounter[0];//pixCounter[0];
 	always @(posedge clk) begin
-		pixCounter <= pixCounter + 1; // Since the reg is only 3 bits, it will reset every 8 cycles
+        if (enable == 1) begin
+            pixCounter <= pixCounter + 1; // Since the reg is only 3 bits, it will reset every 8 cycles
+        end
 	end
 
 	// VGA Timing Generation for a Standard VGA Screen
@@ -112,12 +115,12 @@ module single_block_grid(
     end
     integer n;
     
-    /*always @(posedge slowerClock) begin
-        for(n = 0; n < 16; n = n + 1) begin
-            $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid[n][0], grid[n][1], grid[n][2], grid[n][3], grid[n][4], grid[n][5], grid[n][6], grid[n][7], grid[n][8], grid[n][9], grid[n][10], grid[n][11], grid[n][12], grid[n][13], grid[n][14], grid[n][15]);
-        end
-        for(n = 0; n < 16; n = n + 1) begin
-            $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);
-        end
-    end*/
+    // always @(posedge slowerClock) begin
+    //     for(n = 0; n < 16; n = n + 1) begin
+    //         $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid[n][0], grid[n][1], grid[n][2], grid[n][3], grid[n][4], grid[n][5], grid[n][6], grid[n][7], grid[n][8], grid[n][9], grid[n][10], grid[n][11], grid[n][12], grid[n][13], grid[n][14], grid[n][15]);
+    //     end
+    //     for(n = 0; n < 16; n = n + 1) begin
+    //         $display("%d %b %b %b %b %b %b %b %b %b %b %b %b %d %d %d", grid_out[n+0], grid_out[n+16], grid_out[n+32], grid_out[n+48], grid_out[n+64], grid_out[n+80], grid_out[n+96], grid_out[n+112], grid_out[n+128], grid_out[n+144], grid_out[n+160], grid_out[n+176], grid_out[n+192], grid_out[n+208], grid_out[n+224], grid_out[n+240]);
+    //     end
+    // end
 endmodule

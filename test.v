@@ -31,5 +31,5 @@ module test();
         end
     end
 
-    parent parent(.arduinoClock(arduinoClock), .clock(clock), .start(start));
+    parent parent(.arduinoClock(arduinoClock), .arduinoClock2(arduinoClock), .clock(clock), .start(start));
 endmodule
