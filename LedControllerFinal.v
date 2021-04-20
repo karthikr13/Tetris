@@ -8,7 +8,9 @@ module LedControllerFinal(
     output[7:0]  ledOut2,	// PWM signal to the audio jack
     output ready,
     output ready2,
-    output finished);	// Signal to Arduino to start rendering
+    input tempfinished,
+    output finished,
+    output finished2);	// Signal to Arduino to start rendering
 
     /*
     * Inputs: Clock, arduinoclock, and a ready signal
@@ -42,9 +44,14 @@ module LedControllerFinal(
     wire datatemp3 = 256'b1 <<< 128;
     reg[4:0] newcounter = 0;
     reg latched = 0;
-    reg latched2 = 1;
-    reg latched3 = 1;
+    reg latched2 = 0;
+    reg latched3 = 0;
     reg finishedReg = 0;
+
+    //testing
+    
+//    reg[255:0] dataRegTest[3:0];
+    
 
     always @(posedge arduinoClock) begin
         if(latched == 1) begin
@@ -54,21 +61,21 @@ module LedControllerFinal(
 //            dataReg <= data;
 //        end
         if(dataCounter < 128) begin
-            // color <= dataReg[dataCounter] ? 8'b11111111 : 8'b11110000;
+            latched2 <= 0;
+            color <= dataReg[dataCounter] ? 8'b10011001 : 8'b11110000;
             // tempReg <= dataReg[8'b11111111-dataCounter];
-
             dataCounter <= dataCounter + 1;
-            // $display("Counter1: %d, Value: %b", dataCounter, dataReg[dataCounter]);
+            $display("totalReg: %b, Value: %b", dataReg, dataReg[dataCounter]);
         end else begin
             dataCounter <= 0;
             latched2 <= 1;
         end
 
-        if(color < colorMax) begin
-            color <= color + 1;
-        end else begin
-            color <= 0;
-        end
+        // if(color < colorMax) begin
+        //     color <= dataReg[dataCounter];
+        // end else begin
+        //     color <= 0;
+        // end
     end
 
     always @(posedge arduinoClock2) begin
@@ -76,66 +83,47 @@ module LedControllerFinal(
             latched3 <= 0;
         end
         if(dataCounter2 < 255) begin
-            // color2 <= dataReg[dataCounter2] ? 8'b11111111 : 8'b11110000;
-            // tempReg <= dataReg[8'b11111111-dataCounter2];
+            $display("totalReg: %b, Value: %b", dataReg, dataReg[dataCounter2]);
 
+            // latched3 <= 0;
+            color2 <= dataReg[dataCounter2] ? 8'b11111111 : 8'b10011001;
+            // tempReg <= dataReg[8'b11111111-dataCounter2];
             dataCounter2 <= dataCounter2 + 1;
-            // $display("Counter2: %d, Value: %b", dataCounter2, dataReg[dataCounter2]);
         end else begin
             dataCounter2 <= 128;
             latched3 <= 1;
         end
 
-        if(color2 < colorMax) begin
-            color2 <= color2 + 1;
-        end else begin
-            color2 <= 0;
-        end
+        // if(color2 < colorMax) begin
+        //     color2 <= dataReg[dataCounter2];
+        // end else begin
+        //     color2 <= 0;
+        // end
     end
 
-
-    always @(posedge clk) begin
-        if (CTRL_BEGIN == 1 && latched == 0) begin
+    always @(negedge clk) begin
+        if (CTRL_BEGIN == 1) begin
             finishedReg <= 0;
-            latched <= 1;
-            // if(newcounter < 4) begin
-            //     newcounter <= newcounter + 1;
-            // end else begin
-            //     newcounter <= 0;
-            // end
-            // if(newcounter == 0) begin
-            //     // color <= 8'b11111111;
-            //     dataReg <= datatemp1;
-            // end else if (newcounter == 1) begin
-            //     // color <= 8'b0;
-            //     dataReg <= datatemp2;
-            // end else if (newcounter == 2) begin
-            //     // color <= 8'b11101110;
-            //     dataReg <= datatemp3;
-            // end else if (newcounter == 3) begin
-            //     // color <= 8'b11110000;
-            //     dataReg <= 256'b1<<<255;
-            // end
+            // dataRegTest[0] <= 256'd1;
+            // dataRegTest[1] <= 256'd1 << 250;
+            // dataRegTest[2] <= 256'd1 <<< 250;
+            // dataRegTest[3] <= 256'd1 <<< 30;
             dataReg <= data;
-
-            
+            latched <= 1;
         end
-        if(latched2 == 1 && latched3 == 1) begin
+        if((latched2 == 1 && latched3 == 1) || tempfinished == 1) begin
             latched <= 0;
             finishedReg <= 1;
         end
+        // $display("start, latch, finish: %b, %b, %b", CTRL_BEGIN, latched, finished);
+        // $display("%b", dataReg);
+        $display("LED Controller: Data: %b", data);
     end
 
-    // always @(CTRL_BEGIN) begin
-    //     dataReg <= data;
-    //     //tell arduino to start
-    //     readyReg <= 1;
-    // end
-
-    // outputreg <= reg[counter]
     assign ledOut = color;
     assign ledOut2 = color2;
     assign ready = CTRL_BEGIN;
     assign ready2 = CTRL_BEGIN;
-    assign finished = finishedReg;
+    assign finished = latched2;
+    assign finished2 = latched3;
 endmodule

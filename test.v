@@ -7,7 +7,7 @@ module test();
     end
     reg clock = 1;
     reg arduinoClock = 0;
-    reg start = 0;
+    reg [1:0] start = 0;
     reg boolean = 0;
 
 
@@ -20,12 +20,8 @@ module test();
         arduinoClock <= ~arduinoClock;
     end
 
-    always @(negedge clock) begin
-        if(start == 0) begin
-            start <= 1;
-        end else begin
-            start <= 0;
-        end
+    always @(posedge clock) begin
+        start <= start + 1;
     end
 
     // always @* begin
@@ -38,5 +34,5 @@ module test();
     //     end
     // end
 
-    parent parent(.arduinoClock(arduinoClock), .arduinoClock2(arduinoClock), .clock(clock), .start(start));
+    parent parent(.arduinoClock(arduinoClock), .arduinoClock2(arduinoClock), .clock(clock), .start(start[0]));
 endmodule

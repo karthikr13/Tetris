@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ISA>
+    <Instruction>
+        <Name>step</Name>
+        <Type>R</Type>
+        <Code>11111</Code>
+    </Instruction>
+    <Instruction>
+        <Name>led</Name>
+        <Type>R</Type>
+        <Code>11110</Code>
+    </Instruction>
+</ISA>
